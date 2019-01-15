@@ -6,15 +6,16 @@ import os
 
 results = []
 
+def standardize_data(matrix):
+    mean = np.mean(matrix, axis=0)
+    std = np.std(matrix, axis=0)
+    return (matrix - mean) / std
+
 for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
     for name in files[1:]:
         filename = os.path.join(root, name)
         im = Image.open(filename).resize((40, 40))
         results.append(im.getdata())
 
-
-print(np.array(results).shape)
-
-
-
-#plt.imshow(test)
+results = np.array(results)
+results = standardize_data(results)
