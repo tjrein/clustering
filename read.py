@@ -10,6 +10,24 @@ def standardize_data(matrix):
     std = np.std(matrix, axis=0, ddof=1)
     return (matrix - mean) / std
 
+
+def get_k_eig(cov):
+    w, v = LA.eig(cov)
+    eig_sum = np.sum(w)
+    idx = np.argsort(w)[::-1]
+
+    projection_matrix = []
+    k_sum = 0
+    for i in idx:
+        eig_vec = v[:,i]
+        projection_matrix.append(eig_vec)
+
+        k_sum += w[i]
+        if (k_sum / eig_sum) > 0.95:
+            break
+
+    return np.array(projection_matrix).transpose()
+
 def project(cov):
     w, v = LA.eig(cov)
     idx = np.argsort(w)[::-1][0:2]
@@ -30,15 +48,23 @@ for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
         results.append(list(im.getdata()))
 
 
-results = np.array(results)
-results = standardize_data(results)
-cov = np.cov(results, rowvar=False)
 
+#POC
 #test = np.array([[4,1,2], [2,4,0], [2,3,-8], [3,6,0], [4,4,0], [9,10,1], [6,8,-2], [9,5,1], [8,7,10], [10,8,-5]])
 #new_test = standardize_data(test)
 #cov = np.cov(new_test, rowvar=False)
+#k = get_k_eig(cov)
+#print("HELLO")
 
-projection_matrix = project(cov)
-z = np.matmul(results, projection_matrix)
-plt.scatter(z[:,0], z[:,1])
-plt.show()
+
+
+results = np.array(results)
+results = standardize_data(results)
+cov = np.cov(results, rowvar=False)
+projection_matrix = get_k_eig(cov)
+
+print(projection_matrix.shape)
+#projection_matrix = project(cov)
+#z = np.matmul(results, projection_matrix)
+#plt.scatter(z[:,0], z[:,1])
+#plt.show()
