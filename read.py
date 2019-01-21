@@ -44,14 +44,17 @@ def display_pca(results, cov):
     plt.scatter(z[:,0], z[:,1])
     plt.show()
 
+def convert_to_img(vector):
+    vector -= vector.min()
+    vector /= vector.max()/255.0
+    uint8 = np.uint8(vector).reshape((40,40))
+    return Image.fromarray(uint8)
+
 def display_pc1(results, cov):
     projection_matrix = get_k_eig(cov)
     pc1 = projection_matrix[:,0]
-    pc1 -= pc1.min()
-    pc1 /= pc1.max()/255.0
-    uint8 = np.uint8(pc1).reshape((40,40))
-    test_image = Image.fromarray(uint8)
-    plt.imshow(test_image)
+    img = convert_to_img(pc1)
+    plt.imshow(img)
     plt.show()
 
 def reconstruct_face(results, cov):
@@ -59,13 +62,9 @@ def reconstruct_face(results, cov):
     z = np.matmul(results, projection_matrix)
     obj1 = z[0]
     reconstruction = np.matmul(obj1, projection_matrix.transpose())
-    reconstruction -= reconstruction.min()
-    reconstruction /= reconstruction.max()/255.0
-    uint8 = np.uint8(reconstruction).reshape((40, 40))
-    test_image = Image.fromarray(uint8)
-    plt.imshow(test_image)
+    img = convert_to_img(reconstruction)
+    plt.imshow(img)
     plt.show()
-
 
 results = []
 for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
