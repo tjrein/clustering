@@ -38,43 +38,47 @@ def project(cov):
 
     return np.array(projection_matrix).transpose()
 
-results = []
+def display_pca(results, cov):
+    projection_matrix = project(cov)
+    z = np.matmul(results, projection_matrix)
+    plt.scatter(z[:,0], z[:,1])
+    plt.show()
 
+def display_pc1(results, cov):
+    projection_matrix = get_k_eig(cov)
+    pc1 = projection_matrix[:,0]
+    pc1 -= pc1.min()
+    pc1 /= pc1.max()/255.0
+    uint8 = np.uint8(pc1).reshape((40,40))
+    test_image = Image.fromarray(uint8)
+    plt.imshow(test_image)
+    plt.show()
+
+def reconstruct_face(results, cov):
+    projection_matrix = get_k_eig(cov)
+    z = np.matmul(results, projection_matrix)
+    obj1 = z[0]
+    reconstruction = np.matmul(obj1, projection_matrix.transpose())
+    reconstruction -= reconstruction.min()
+    reconstruction /= reconstruction.max()/255.0
+    uint8 = np.uint8(reconstruction).reshape((40, 40))
+    test_image = Image.fromarray(uint8)
+    plt.imshow(test_image)
+    plt.show()
+
+
+results = []
 for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
     for name in files[1:]:
         filename = os.path.join(root, name)
         im = Image.open(filename).resize((40, 40))
         results.append(list(im.getdata()))
 
-#POC
-#test = np.array([[4,1,2], [2,4,0], [2,3,-8], [3,6,0], [4,4,0], [9,10,1], [6,8,-2], [9,5,1], [8,7,10], [10,8,-5]])
-#new_test = standardize_data(test)
-#cov = np.cov(new_test, rowvar=False)
-#k = get_k_eig(cov)
-#pc1 = k[:,0]
-#print("HELLO", pc1.shape)
 
 results = np.array(results)
 results = standardize_data(results)
 cov = np.cov(results, rowvar=False)
-projection_matrix = get_k_eig(cov)
-pc1 = projection_matrix[:,0]
 
-pc1 -= pc1.min()
-pc1 /= pc1.max()/255.0
-uint8 = np.uint8(pc1).reshape((40,40))
-
-test_image = Image.fromarray(uint8)
-
-plt.imshow(test_image)
-plt.show()
-
-#test = np.reshape(pc1, (40, 40))
-#print("okay," pc1.shape)
-#print(projection_matrix[0:]
-#projection_matrix = project(cov)
-
-#z = np.matmul(results, projection_matrix)
-
-#plt.scatter(z[:,0], z[:,1])
-#plt.show()
+#display_pca(results, cov)
+#display_pc1(results, cov)
+#reconstruct_face(results, cov)
