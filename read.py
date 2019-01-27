@@ -74,7 +74,39 @@ for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
         im = Image.open(filename).resize((40, 40))
         results.append(list(im.getdata()))
 
+def myKMeans(data):
+    num_obs = data.shape[0]
+    inds = random.sample(range(0, num_obs), 2)
 
+    ref1 = data[inds[0]]
+    ref2 = data[inds[1]]
+
+    clusters = [ [], [] ]
+
+    for i in data:
+        distance_to_1 = LA.norm(i-ref1)
+        distance_to_2 = LA.norm(i-ref2)
+
+        color = 'b'
+
+        if distance_to_1 < distance_to_2:
+            color = 'r'
+            clusters[0].append(i.tolist())
+        else:
+            clusters[1].append(i.tolist())
+
+        plt.scatter(i[0], i[1], c=color, marker='x', s=10)
+
+    plt.scatter(ref1[0], ref1[1], c="r", marker="o", s=80)
+    plt.scatter(ref2[0], ref2[1], c="b", marker="o", s=80)
+
+
+    clusters = np.array(clusters)
+
+    for cluster in clusters:
+        print("HEY", cluster)
+
+    plt.show()
 
 t_shirts = np.array([[61, 120],
                      [65, 130],
@@ -105,33 +137,8 @@ t_shirts = np.array([[61, 120],
                      [72, 175]])
 
 standard_tshirts = standardize_data(t_shirts)
-num_obs = standard_tshirts.shape[0]
 
-inds = random.sample(range(0, num_obs), 2)
-
-ref1 = standard_tshirts[inds[0]]
-ref2 = standard_tshirts[inds[1]]
-
-
-#plt.scatter(standard_tshirts[:,0], standard_tshirts[:,1,], c="r", marker='x', s=10)
-
-
-for i in standard_tshirts:
-    distance_to_1 = LA.norm(i-ref1)
-    distance_to_2 = LA.norm(i-ref2)
-
-    color = 'b'
-
-    if distance_to_1 < distance_to_2:
-        color = 'r'
-
-    plt.scatter(i[0], i[1], c=color, marker='x', s=10)
-
-
-plt.scatter(ref1[0], ref1[1], c="r", marker="o", s=80)
-plt.scatter(ref2[0], ref2[1], c="b", marker="o", s=80)
-
-plt.show()
+myKMeans(standard_tshirts)
 #Theory part 1
 #test_data = np.array( [ [-2, 1], [-5, -4], [-3, 1], [0, 3], [-8, 11], [-2, 5], [1, 0], [5, -1], [-1, -3], [6, 1] ] )
 #test_data = standardize_data(test_data)
