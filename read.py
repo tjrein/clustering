@@ -103,8 +103,17 @@ def myKMeans(data):
 
     clusters = np.array(clusters)
 
-    for cluster in clusters:
-        print("HEY", cluster)
+    for i, cluster in enumerate(clusters):
+        color = 'g'
+        if i is 0:
+            color = 'y'
+
+
+        print("THIS is len", len(cluster))
+        new_ref = np.sum(cluster, axis=0) / len(cluster)
+        plt.scatter(new_ref[0], new_ref[1], c=color, marker="o", s=80)
+
+        print("new_ref", new_ref)
 
     plt.show()
 
