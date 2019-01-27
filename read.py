@@ -4,6 +4,7 @@ from numpy import linalg as LA
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
+import random
 
 def standardize_data(matrix):
     mean = np.mean(matrix, axis=0)
@@ -74,9 +75,82 @@ for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
         results.append(list(im.getdata()))
 
 
-results = np.array(results)
-results = standardize_data(results)
-cov = np.cov(results, rowvar=False)
+
+t_shirts = np.array([[61, 120],
+                     [65, 130],
+                     [72, 250],
+                     [63, 120],
+                     [62, 195],
+                     [62, 120],
+                     [60, 100],
+                     [70, 140],
+                     [70, 160],
+                     [65, 132],
+                     [48, 75],
+                     [72, 175],
+                     [67, 167],
+                     [69, 140],
+                     [96, 285],
+                     [70, 172],
+                     [70, 185],
+                     [71, 168],
+                     [70, 180],
+                     [69, 170],
+                     [70, 150],
+                     [70, 170],
+                     [71, 144],
+                     [66, 140],
+                     [67, 175],
+                     [67, 165],
+                     [72, 175]])
+
+standard_tshirts = standardize_data(t_shirts)
+num_obs = standard_tshirts.shape[0]
+
+inds = random.sample(range(0, num_obs), 2)
+
+ref1 = standard_tshirts[inds[0]]
+ref2 = standard_tshirts[inds[1]]
+
+
+#plt.scatter(standard_tshirts[:,0], standard_tshirts[:,1,], c="r", marker='x', s=10)
+
+
+for i in standard_tshirts:
+    distance_to_1 = LA.norm(i-ref1)
+    distance_to_2 = LA.norm(i-ref2)
+
+    color = 'b'
+
+    if distance_to_1 < distance_to_2:
+        color = 'r'
+
+    plt.scatter(i[0], i[1], c=color, marker='x', s=10)
+
+
+plt.scatter(ref1[0], ref1[1], c="r", marker="o", s=80)
+plt.scatter(ref2[0], ref2[1], c="b", marker="o", s=80)
+
+plt.show()
+#Theory part 1
+#test_data = np.array( [ [-2, 1], [-5, -4], [-3, 1], [0, 3], [-8, 11], [-2, 5], [1, 0], [5, -1], [-1, -3], [6, 1] ] )
+#test_data = standardize_data(test_data)
+#a_cov = np.cov(test_data, rowvar=False)
+#w,v = LA.eig(a_cov)
+
+
+#Theory part 1 example from slides
+#other_test = np.array([ [4,1,2], [2,4,0], [2,3,-8], [3,6,0], [4,4,0], [9,10,1], [6,8,-2], [9,5,1], [8,7,10], [10,8,-5] ])
+#other_test = standardize_data(other_test)
+#b_cov = np.cov(other_test, rowvar=False)
+#x,y = LA.eig(b_cov)
+
+
+
+
+#results = np.array(results)
+#results = standardize_data(results)
+#cov = np.cov(results, rowvar=False)
 
 #display_pca(results, cov)
 #display_pc1(results, cov)
