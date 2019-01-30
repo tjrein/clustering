@@ -88,11 +88,8 @@ def determine_cluster(obs, ref_vecs):
 
     return cluster
 
-
-def compute_clusters(data, reference_vectors, iteration, k):
-    clusters = [ [] for _ in range(k)]
-
-    color_map = {
+def get_color(index):
+    color = {
         0: 'r',
         1: 'b',
         2: 'g',
@@ -100,20 +97,24 @@ def compute_clusters(data, reference_vectors, iteration, k):
         4: 'c',
         5: 'm',
         6: 'k'
-    }
+    }[index]
 
+    return color
+
+def compute_clusters(data, reference_vectors, iteration, k):
+    clusters = [ [] for _ in range(k)]
 
     plt.figure(iteration)
 
     for obs in data:
-        cluster = determine_cluster(obs, reference_vectors)
+        index = determine_cluster(obs, reference_vectors)
 
-        color = color_map[cluster]
-        clusters[cluster].append(obs.tolist())
+        color = get_color(index)
+        clusters[index].append(obs.tolist())
         plt.scatter(obs[0], obs[1], c=color, marker='x', s=10)
 
     for i, vec in enumerate(reference_vectors):
-        color = color_map[i]
+        color = get_color(i)
         plt.scatter(vec[0], vec[1], c=color, marker="o", s=80)
 
     return clusters
