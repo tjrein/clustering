@@ -108,19 +108,15 @@ def compute_clusters(data, reference_vectors, iteration, k):
 
     for obs in data:
         index = determine_cluster(obs, reference_vectors)
-
-        #color = get_color(index)
         clusters[index].append(obs)
-        #plt.scatter(obs[0], obs[1], c=color, marker='x', s=10)
-
-    #for i, vec in enumerate(reference_vectors):
-    #    color = get_color(i)
-    #    plt.scatter(vec[0], vec[1], c=color, marker="o", s=80)
 
     return clusters
 
 def plot_kmeans(clusters, reference_vectors, iteration):
-    plt.figure(iteration)
+    #plt.title("Iteration " + str(i+1))
+
+    print("clusters", clusters)
+
     for i, cluster in enumerate(clusters):
         color = get_color(i)
         for obs in cluster:
@@ -129,6 +125,8 @@ def plot_kmeans(clusters, reference_vectors, iteration):
     for i, vec in enumerate(reference_vectors):
         color = get_color(i)
         plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
+
+    return
 
 def compute_reference_vectors(iteration, clusters):
     reference_vectors = []
@@ -139,8 +137,21 @@ def compute_reference_vectors(iteration, clusters):
 
     return reference_vectors
 
+def animate_test(i, *iterations):
+    plt.clf()
+    plt.title("Iteration " + str(i+1))
+
+    clusters = iterations[i]["clusters"]
+    reference_vectors = iterations[i]["reference_vectors"]
+
+    plot_kmeans(clusters, reference_vectors, 1)
+
+    return
 
 def myKMeans(data, k):
+    fig = plt.figure()
+    iterations = []
+
     num_obs = data.shape[0]
     random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
@@ -150,13 +161,16 @@ def myKMeans(data, k):
     for i in rand_inds:
         reference_vectors.append(data[i])
 
+
     reference_vectors = np.array(reference_vectors)
     clusters = np.array(compute_clusters(data, reference_vectors, 1, k))
-    plot_kmeans(clusters, reference_vectors, 1)
+    iteration = 1
+
+    iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
+
 
     iteration = 1
     while True:
-
         new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
         change = np.sum(np.abs(reference_vectors - new_reference_vectors))
 
@@ -164,10 +178,13 @@ def myKMeans(data, k):
             break
 
         clusters = np.array(compute_clusters(data, new_reference_vectors, iteration, k))
-        plot_kmeans(clusters, reference_vectors, iteration)
+        reference_vectors = new_reference_vectors
+        iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
+        #plot_kmeans(clusters, reference_vectors, iteration)
 
         iteration += 1
-        reference_vectors = new_reference_vectors
+
+    ani = animation.FuncAnimation(fig, animate_test, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
 
     plt.show()
 
