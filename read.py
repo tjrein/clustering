@@ -156,37 +156,6 @@ def myKMeans(data, k):
 
     plt.show()
 
-t_shirts = np.array([[61, 120],
-                     [65, 130],
-                     [72, 250],
-                     [63, 120],
-                     [62, 195],
-                     [62, 120],
-                     [60, 100],
-                     [70, 140],
-                     [70, 160],
-                     [65, 132],
-                     [48, 75],
-                     [72, 175],
-                     [67, 167],
-                     [69, 140],
-                     [96, 285],
-                     [70, 172],
-                     [70, 185],
-                     [71, 168],
-                     [70, 180],
-                     [69, 170],
-                     [70, 150],
-                     [70, 170],
-                     [71, 144],
-                     [66, 140],
-                     [67, 175],
-                     [67, 165],
-                     [72, 175]])
-
-standard_tshirts = standardize_data(t_shirts)
-
-myKMeans(standard_tshirts, 3)
 #Theory part 1
 #test_data = np.array( [ [-2, 1], [-5, -4], [-3, 1], [0, 3], [-8, 11], [-2, 5], [1, 0], [5, -1], [-1, -3], [6, 1] ] )
 #test_data = standardize_data(test_data)
@@ -203,10 +172,15 @@ myKMeans(standard_tshirts, 3)
 
 
 
-#results = np.array(results)
-#results = standardize_data(results)
-#cov = np.cov(results, rowvar=False)
+results = np.array(results)
+results = standardize_data(results)
+cov = np.cov(results, rowvar=False)
 
 #display_pca(results, cov)
 #display_pc1(results, cov)
 #reconstruct_face(results, cov)
+
+projection_matrix = project(cov)
+z = np.matmul(results, projection_matrix)
+
+myKMeans(z, 3)
