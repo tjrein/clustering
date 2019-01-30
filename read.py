@@ -81,7 +81,6 @@ def determine_cluster(obs, ref_vecs):
 
     for i in range(1, len(ref_vecs)):
         distance = LA.norm(obs - ref_vecs[i])
-        print("distance", distance)
 
         if distance < min:
             min = distance
@@ -105,8 +104,20 @@ def compute_clusters(data, reference_vectors, color_map):
 
     return clusters
 
+def compute_reference_vectors(iteration, clusters):
+    plt.figure(iteration)
+
+    reference_vectors = []
+
+    for i, cluster in enumerate(clusters):
+        new_ref = np.sum(cluster, axis=0) / len(cluster)
+        reference_vectors.append(new_ref)
+
+    return reference_vectors
+
 def myKMeans(data, k):
     num_obs = data.shape[0]
+    #random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
 
     color_map = {
@@ -116,23 +127,29 @@ def myKMeans(data, k):
         3: 'y'
     }
 
-
     reference_vectors = []
+
     for i in rand_inds:
         reference_vectors.append(data[i])
 
+    reference_vectors = np.array(reference_vectors)
     clusters = np.array(compute_clusters(data, reference_vectors, color_map))
+    iteration = 2
 
-    plt.figure(2)
-    new_reference_vectors = []
-    for i, cluster in enumerate(clusters):
-        new_ref = np.sum(cluster, axis=0) / len(cluster)
-        new_reference_vectors.append(new_ref)
 
-    print("old_vectors", reference_vectors)
-    print("new_vecors", new_reference_vectors)
+    while True:
+        new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
+        clusters = np.array(compute_clusters(data, new_reference_vectors, color_map))
 
-    cluster = np.array(compute_clusters(data, new_reference_vectors, color_map))
+        dist = np.sum(np.abs(np.array(reference_vectors) - new_reference_vectors))
+
+        if dist < (2 ** -23):
+            print("condition met!!!!!!")
+            break
+
+        iteration += 1
+        reference_vectors = new_reference_vectors
+
 
     plt.show()
 
