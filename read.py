@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
 import random
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation as animation
 
 def standardize_data(matrix):
     mean = np.mean(matrix, axis=0)
@@ -28,9 +30,9 @@ def get_k_eig(cov):
 
     return np.array(projection_matrix).transpose()
 
-def project(cov):
+def project(cov, k):
     w, v = LA.eig(cov)
-    idx = np.argsort(w)[::-1][0:2]
+    idx = np.argsort(w)[::-1][0:k]
 
     projection_matrix = []
     for i in idx:
@@ -40,7 +42,7 @@ def project(cov):
     return np.array(projection_matrix).transpose()
 
 def display_pca(results, cov):
-    projection_matrix = project(cov)
+    projection_matrix = project(cov, 2)
     z = np.matmul(results, projection_matrix)
     plt.scatter(z[:,0], z[:,1])
     plt.show()
@@ -104,20 +106,29 @@ def get_color(index):
 def compute_clusters(data, reference_vectors, iteration, k):
     clusters = [ [] for _ in range(k)]
 
-    plt.figure(iteration)
-
     for obs in data:
         index = determine_cluster(obs, reference_vectors)
 
-        color = get_color(index)
-        clusters[index].append(obs.tolist())
-        plt.scatter(obs[0], obs[1], c=color, marker='x', s=10)
+        #color = get_color(index)
+        clusters[index].append(obs)
+        #plt.scatter(obs[0], obs[1], c=color, marker='x', s=10)
+
+    #for i, vec in enumerate(reference_vectors):
+    #    color = get_color(i)
+    #    plt.scatter(vec[0], vec[1], c=color, marker="o", s=80)
+
+    return clusters
+
+def plot_kmeans(clusters, reference_vectors, iteration):
+    plt.figure(iteration)
+    for i, cluster in enumerate(clusters):
+        color = get_color(i)
+        for obs in cluster:
+            plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
 
     for i, vec in enumerate(reference_vectors):
         color = get_color(i)
-        plt.scatter(vec[0], vec[1], c=color, marker="o", s=80)
-
-    return clusters
+        plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
 
 def compute_reference_vectors(iteration, clusters):
     reference_vectors = []
@@ -127,6 +138,7 @@ def compute_reference_vectors(iteration, clusters):
         reference_vectors.append(new_ref)
 
     return reference_vectors
+
 
 def myKMeans(data, k):
     num_obs = data.shape[0]
@@ -140,34 +152,27 @@ def myKMeans(data, k):
 
     reference_vectors = np.array(reference_vectors)
     clusters = np.array(compute_clusters(data, reference_vectors, 1, k))
+    plot_kmeans(clusters, reference_vectors, 1)
 
-    iteration = 2
+    iteration = 1
     while True:
-        new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
 
+        new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
         change = np.sum(np.abs(reference_vectors - new_reference_vectors))
 
         if change < (2 ** -23):
             break
 
         clusters = np.array(compute_clusters(data, new_reference_vectors, iteration, k))
+        plot_kmeans(clusters, reference_vectors, iteration)
+
         iteration += 1
         reference_vectors = new_reference_vectors
 
     plt.show()
 
-#Theory part 1
-#test_data = np.array( [ [-2, 1], [-5, -4], [-3, 1], [0, 3], [-8, 11], [-2, 5], [1, 0], [5, -1], [-1, -3], [6, 1] ] )
-#test_data = standardize_data(test_data)
-#a_cov = np.cov(test_data, rowvar=False)
-#w,v = LA.eig(a_cov)
 
 
-#Theory part 1 example from slides
-#other_test = np.array([ [4,1,2], [2,4,0], [2,3,-8], [3,6,0], [4,4,0], [9,10,1], [6,8,-2], [9,5,1], [8,7,10], [10,8,-5] ])
-#other_test = standardize_data(other_test)
-#b_cov = np.cov(other_test, rowvar=False)
-#x,y = LA.eig(b_cov)
 
 
 
@@ -180,7 +185,6 @@ cov = np.cov(results, rowvar=False)
 #display_pc1(results, cov)
 #reconstruct_face(results, cov)
 
-projection_matrix = project(cov)
+projection_matrix = project(cov, 2)
 z = np.matmul(results, projection_matrix)
-
-myKMeans(z, 3)
+myKMeans(z, 2)
