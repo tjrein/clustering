@@ -74,11 +74,11 @@ for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
         im = Image.open(filename).resize((40, 40))
         results.append(list(im.getdata()))
 
-
 def determine_cluster(obs, ref_vecs):
     min = LA.norm(obs - ref_vecs[0])
     cluster = 0
 
+    #TODO: double check this computes Euclidian
     for i in range(1, len(ref_vecs)):
         distance = LA.norm(obs - ref_vecs[i])
 
@@ -89,11 +89,25 @@ def determine_cluster(obs, ref_vecs):
     return cluster
 
 
-def compute_clusters(data, reference_vectors, color_map):
-    clusters = [ [], [] ]
+def compute_clusters(data, reference_vectors, iteration, k):
+    clusters = [ [] for _ in range(k)]
+
+    color_map = {
+        0: 'r',
+        1: 'b',
+        2: 'g',
+        3: 'y',
+        4: 'c',
+        5: 'm',
+        6: 'k'
+    }
+
+
+    plt.figure(iteration)
 
     for obs in data:
         cluster = determine_cluster(obs, reference_vectors)
+
         color = color_map[cluster]
         clusters[cluster].append(obs.tolist())
         plt.scatter(obs[0], obs[1], c=color, marker='x', s=10)
@@ -105,8 +119,6 @@ def compute_clusters(data, reference_vectors, color_map):
     return clusters
 
 def compute_reference_vectors(iteration, clusters):
-    plt.figure(iteration)
-
     reference_vectors = []
 
     for i, cluster in enumerate(clusters):
@@ -117,15 +129,8 @@ def compute_reference_vectors(iteration, clusters):
 
 def myKMeans(data, k):
     num_obs = data.shape[0]
-    #random.seed(0)
+    random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
-
-    color_map = {
-        0: 'r',
-        1: 'b',
-        2: 'g',
-        3: 'y'
-    }
 
     reference_vectors = []
 
@@ -133,23 +138,20 @@ def myKMeans(data, k):
         reference_vectors.append(data[i])
 
     reference_vectors = np.array(reference_vectors)
-    clusters = np.array(compute_clusters(data, reference_vectors, color_map))
+    clusters = np.array(compute_clusters(data, reference_vectors, 1, k))
+
     iteration = 2
-
-
     while True:
         new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
-        clusters = np.array(compute_clusters(data, new_reference_vectors, color_map))
 
-        dist = np.sum(np.abs(np.array(reference_vectors) - new_reference_vectors))
+        change = np.sum(np.abs(reference_vectors - new_reference_vectors))
 
-        if dist < (2 ** -23):
-            print("condition met!!!!!!")
+        if change < (2 ** -23):
             break
 
+        clusters = np.array(compute_clusters(data, new_reference_vectors, iteration, k))
         iteration += 1
         reference_vectors = new_reference_vectors
-
 
     plt.show()
 
@@ -183,7 +185,7 @@ t_shirts = np.array([[61, 120],
 
 standard_tshirts = standardize_data(t_shirts)
 
-myKMeans(standard_tshirts, 2)
+myKMeans(standard_tshirts, 3)
 #Theory part 1
 #test_data = np.array( [ [-2, 1], [-5, -4], [-3, 1], [0, 3], [-8, 11], [-2, 5], [1, 0], [5, -1], [-1, -3], [6, 1] ] )
 #test_data = standardize_data(test_data)
