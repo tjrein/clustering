@@ -138,9 +138,12 @@ def compute_reference_vectors(clusters):
 
     return reference_vectors
 
+def init():
+    return
+
 def animate(i, *iterations):
     ax.clear()
-    plt.title("Iteration " + str(i+1))
+    ax.set_title("Iteration " + str(i+1))
 
     clusters = iterations[i]["clusters"]
     reference_vectors = iterations[i]["reference_vectors"]
@@ -181,8 +184,11 @@ def myKMeans(data, k):
         reference_vectors = new_reference_vectors
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
-    ani = animation.FuncAnimation(fig, animate, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
-    plt.show()
+    ani = animation.FuncAnimation(fig, animate, interval=2000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
+    #plt.show()
+
+    ani.save("test.mp4", writer="ffmpeg", fps=0.5)
+    print("done")
 
 
 
@@ -198,4 +204,4 @@ projection_matrix = project(cov, 3)
 
 z = np.matmul(results, projection_matrix)
 
-myKMeans(z, 3)
+myKMeans(z, 5)
