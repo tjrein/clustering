@@ -7,12 +7,7 @@ import os
 import random
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
-from read import read_files
-
-def standardize_data(matrix):
-    mean = np.mean(matrix, axis=0)
-    std = np.std(matrix, axis=0, ddof=1)
-    return (matrix - mean) / std
+from read import read_files, standardize_data
 
 def get_k_eig(cov):
     w, v = LA.eig(cov)
@@ -70,17 +65,6 @@ def reconstruct_face(results, cov):
     img = convert_to_img(reconstruction)
     plt.imshow(img)
     plt.show()
-
-
-#results = []
-#for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
-#    for name in files:
-#        if name == "Readme.txt":
-#            continue
-
-#        filename = os.path.join(root, name)
-#        im = Image.open(filename).resize((40, 40))
-#        results.append(list(im.getdata()))
 
 def determine_cluster(obs, ref_vecs):
     min = LA.norm(obs - ref_vecs[0])
@@ -193,10 +177,7 @@ def myKMeans(data, k):
     print("done")
 
 
-results = read_files()
-print("results", results)
-
-results = np.array(results)
+results = np.array(read_files())
 results = standardize_data(results)
 cov = np.cov(results, rowvar=False)
 
