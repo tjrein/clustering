@@ -72,7 +72,10 @@ def reconstruct_face(results, cov):
 
 results = []
 for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
-    for name in files[1:]:
+    for name in files:
+        if name == "Readme.txt":
+            continue
+
         filename = os.path.join(root, name)
         im = Image.open(filename).resize((40, 40))
         results.append(list(im.getdata()))
@@ -185,9 +188,9 @@ def myKMeans(data, k):
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
     ani = animation.FuncAnimation(fig, animate, interval=2000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
-    #plt.show()
+    plt.show()
 
-    ani.save("test.mp4", writer="ffmpeg", fps=0.5)
+    #ani.save("test.avi", writer="ffmpeg", fps=0.5)
     print("done")
 
 
@@ -204,4 +207,4 @@ projection_matrix = project(cov, 3)
 
 z = np.matmul(results, projection_matrix)
 
-myKMeans(z, 5)
+myKMeans(z, 3)
