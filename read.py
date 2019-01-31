@@ -32,6 +32,7 @@ def get_k_eig(cov):
 
 def project(cov, k):
     w, v = LA.eig(cov)
+
     idx = np.argsort(w)[::-1][0:k]
 
     projection_matrix = []
@@ -115,14 +116,16 @@ def compute_clusters(data, reference_vectors, k):
 def plot_kmeans(clusters, reference_vectors):
     for i, cluster in enumerate(clusters):
         color = get_color(i)
+
         for obs in cluster:
             #plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
-            ax.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
+            #test = np.real(obs)
+            ax.scatter(obs[0], obs[1], obs[2], c=color, marker='x', linewidths=1, s=10)
 
     for i, vec in enumerate(reference_vectors):
         color = get_color(i)
         #plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
-        ax.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
+        ax.scatter(vec[0], vec[1], vec[2], c=color, marker="o", s=100, edgecolors='k')
 
     return
 
@@ -150,15 +153,13 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 def myKMeans(data, k):
-    #ax = fig.add_subplot(111, projection='3d')
-
-    #ax.scatter(np.real(data[:,0]), np.real(data[:,1]), np.real(data[:,2]), marker="x")
-
     iterations = []
 
     num_obs = data.shape[0]
     random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
+
+    data = np.real(data)
 
     reference_vectors = []
 
@@ -168,8 +169,6 @@ def myKMeans(data, k):
     reference_vectors = np.array(reference_vectors)
     clusters = np.array(compute_clusters(data, reference_vectors, k))
     iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
-
-    #ani = animation.FuncAnimation(fig, animate, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
 
     while True:
         new_reference_vectors = np.array(compute_reference_vectors(clusters))
@@ -196,5 +195,7 @@ cov = np.cov(results, rowvar=False)
 #reconstruct_face(results, cov)
 
 projection_matrix = project(cov, 3)
+
 z = np.matmul(results, projection_matrix)
+
 myKMeans(z, 3)
