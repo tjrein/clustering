@@ -25,7 +25,6 @@ def determine_cluster(obs, ref_vecs):
     min = LA.norm(obs - ref_vecs[0])
     cluster = 0
 
-    #TODO: double check this computes Euclidian
     for i in range(1, len(ref_vecs)):
         distance = LA.norm(obs - ref_vecs[i])
 
@@ -63,7 +62,6 @@ def plot_kmeans(clusters, reference_vectors):
 
         for obs in cluster:
             #plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
-            #test = np.real(obs)
             ax.scatter(obs[0], obs[1], obs[2], c=color, marker='x', linewidths=1, s=10)
 
     for i, vec in enumerate(reference_vectors):
@@ -82,9 +80,25 @@ def compute_reference_vectors(clusters):
 
     return reference_vectors
 
+z = None
+def init(*iteratoins):
+    ax.set_title("Initial Setup")
+    ax.scatter(z[:,0], z[:,1], z[:,2], marker='x', linewidths=1, s=10)
+    plt.savefig("kmeans_intial_setup", bbox_inches="tight")
+    return
+
 def animate(i, *iterations):
     ax.clear()
     ax.set_title("Iteration " + str(i+1))
+
+    print("I", i)
+    print("len", len(iterations))
+
+    if i is 0:
+        plt.savefig("kmeans_first_iteration", bbox_inches="tight")
+
+    if i is len(iterations) - 1:
+        plt.savefig("kmeans_last_iteration", bbox_inches="tight")
 
     clusters = iterations[i]["clusters"]
     reference_vectors = iterations[i]["reference_vectors"]
@@ -93,17 +107,12 @@ def animate(i, *iterations):
 
     return
 
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
 def myKMeans(data, k):
     iterations = []
 
     num_obs = data.shape[0]
     random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
-
-    data = np.real(data)
 
     reference_vectors = []
 
@@ -125,19 +134,19 @@ def myKMeans(data, k):
         reference_vectors = new_reference_vectors
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
-    ani = animation.FuncAnimation(fig, animate, interval=2000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, init_func=init, interval=2000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
     plt.show()
 
     #ani.save("test.avi", writer="ffmpeg", fps=0.5)
     print("done")
 
 
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 results = np.array(read_files())
 results = standardize_data(results)
 cov = np.cov(results, rowvar=False)
-
 projection_matrix = project(cov, 3)
-
-z = np.matmul(results, projection_matrix)
+z = np.real(np.matmul(results, projection_matrix))
 
 myKMeans(z, 3)

@@ -6,7 +6,9 @@ from numpy import linalg as LA
 def display_pca(results, cov):
     projection_matrix = project(cov, 2)
     z = np.matmul(results, projection_matrix)
+    z = np.real(z)
     plt.scatter(z[:,0], z[:,1])
+    plt.savefig("pca", bbox_inches="tight")
     plt.show()
 
 def project(cov, k):

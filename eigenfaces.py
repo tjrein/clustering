@@ -28,6 +28,7 @@ def get_k_eig(cov):
 
         k_sum += w[i]
         if (k_sum / eig_sum) > 0.95:
+            print("Number of Principal Components: " + str(len(projection_matrix)))
             break
 
     return np.array(projection_matrix).transpose()
@@ -38,10 +39,12 @@ def display_pc1(results, cov):
     pc1 = projection_matrix[:,0].copy()
     img = convert_to_img(pc1)
     plt.imshow(img)
+    plt.savefig("primary", bbox_inches='tight')
 
 def convert_to_img(vector):
     vector -= vector.min()
     vector /= vector.max()/255.0
+    vector = np.real(vector)
     uint8 = np.uint8(vector).reshape((40,40))
     return Image.fromarray(uint8)
 
@@ -70,7 +73,7 @@ def reconstruct_face(results, cov):
     reconstruction = np.matmul(obj1, projection_matrix.transpose())
     img = convert_to_img(reconstruction)
     plt.imshow(img)
-
+    plt.savefig("reconstruction", bbox_inches='tight')
 
 results = np.array(read_files())
 results = standardize_data(results)
