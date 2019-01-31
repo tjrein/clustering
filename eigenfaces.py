@@ -33,11 +33,11 @@ def get_k_eig(cov):
     return np.array(projection_matrix).transpose()
 
 def display_pc1(results, cov):
+    fig = plt.figure(1)
     projection_matrix = get_k_eig(cov)
-    pc1 = projection_matrix[:,0]
+    pc1 = projection_matrix[:,0].copy()
     img = convert_to_img(pc1)
     plt.imshow(img)
-    plt.show()
 
 def convert_to_img(vector):
     vector -= vector.min()
@@ -45,9 +45,8 @@ def convert_to_img(vector):
     uint8 = np.uint8(vector).reshape((40,40))
     return Image.fromarray(uint8)
 
-
 def reconstruct_face(results, cov):
-    fig = plt.figure()
+    fig = plt.figure(2)
 
     pc1 = project(cov, 1)
     projection_matrix = get_k_eig(cov)
@@ -72,12 +71,12 @@ def reconstruct_face(results, cov):
     img = convert_to_img(reconstruction)
     plt.imshow(img)
 
-    plt.show()
-
 
 results = np.array(read_files())
 results = standardize_data(results)
 cov = np.cov(results, rowvar=False)
 
-#display_pc1(results, cov)
+display_pc1(results, cov)
 reconstruct_face(results, cov)
+
+plt.show()
