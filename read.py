@@ -103,7 +103,7 @@ def get_color(index):
 
     return color
 
-def compute_clusters(data, reference_vectors, iteration, k):
+def compute_clusters(data, reference_vectors, k):
     clusters = [ [] for _ in range(k)]
 
     for obs in data:
@@ -112,23 +112,21 @@ def compute_clusters(data, reference_vectors, iteration, k):
 
     return clusters
 
-def plot_kmeans(clusters, reference_vectors, iteration):
-    #plt.title("Iteration " + str(i+1))
-
-    print("clusters", clusters)
-
+def plot_kmeans(clusters, reference_vectors):
     for i, cluster in enumerate(clusters):
         color = get_color(i)
         for obs in cluster:
-            plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
+            #plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
+            ax.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
 
     for i, vec in enumerate(reference_vectors):
         color = get_color(i)
-        plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
+        #plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
+        ax.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
 
     return
 
-def compute_reference_vectors(iteration, clusters):
+def compute_reference_vectors(clusters):
     reference_vectors = []
 
     for i, cluster in enumerate(clusters):
@@ -137,19 +135,25 @@ def compute_reference_vectors(iteration, clusters):
 
     return reference_vectors
 
-def animate_test(i, *iterations):
-    plt.clf()
+def animate(i, *iterations):
+    ax.clear()
     plt.title("Iteration " + str(i+1))
 
     clusters = iterations[i]["clusters"]
     reference_vectors = iterations[i]["reference_vectors"]
 
-    plot_kmeans(clusters, reference_vectors, 1)
+    plot_kmeans(clusters, reference_vectors)
 
     return
 
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
 def myKMeans(data, k):
-    fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+
+    #ax.scatter(np.real(data[:,0]), np.real(data[:,1]), np.real(data[:,2]), marker="x")
+
     iterations = []
 
     num_obs = data.shape[0]
@@ -161,36 +165,25 @@ def myKMeans(data, k):
     for i in rand_inds:
         reference_vectors.append(data[i])
 
-
     reference_vectors = np.array(reference_vectors)
-    clusters = np.array(compute_clusters(data, reference_vectors, 1, k))
-    iteration = 1
-
+    clusters = np.array(compute_clusters(data, reference_vectors, k))
     iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
+    #ani = animation.FuncAnimation(fig, animate, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
 
-    iteration = 1
     while True:
-        new_reference_vectors = np.array(compute_reference_vectors(iteration, clusters))
+        new_reference_vectors = np.array(compute_reference_vectors(clusters))
         change = np.sum(np.abs(reference_vectors - new_reference_vectors))
 
         if change < (2 ** -23):
             break
 
-        clusters = np.array(compute_clusters(data, new_reference_vectors, iteration, k))
+        clusters = np.array(compute_clusters(data, new_reference_vectors, k))
         reference_vectors = new_reference_vectors
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
-        #plot_kmeans(clusters, reference_vectors, iteration)
 
-        iteration += 1
-
-    ani = animation.FuncAnimation(fig, animate_test, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
-
+    ani = animation.FuncAnimation(fig, animate, interval=1000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
     plt.show()
-
-
-
-
 
 
 
@@ -202,6 +195,6 @@ cov = np.cov(results, rowvar=False)
 #display_pc1(results, cov)
 #reconstruct_face(results, cov)
 
-projection_matrix = project(cov, 2)
+projection_matrix = project(cov, 3)
 z = np.matmul(results, projection_matrix)
-myKMeans(z, 2)
+myKMeans(z, 3)
