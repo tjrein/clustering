@@ -32,7 +32,7 @@ def get_k_eig(cov):
 
     return np.array(projection_matrix).transpose()
 
-def display_pc1(results, cov):
+def display_pc1(data, cov):
     fig = plt.figure(1)
     projection_matrix = get_k_eig(cov)
     pc1 = projection_matrix[:,0].copy()
@@ -47,7 +47,7 @@ def convert_to_img(vector):
     uint8 = np.uint8(vector).reshape((40,40))
     return Image.fromarray(uint8)
 
-def reconstruct_face(results, cov):
+def reconstruct_face(data, cov):
     fig = plt.figure(2)
 
     pc1 = project(cov, 1)
@@ -55,30 +55,34 @@ def reconstruct_face(results, cov):
 
     a = fig.add_subplot(131)
     a.set_title("Original Image")
-    face_1 = results[0].copy()
+    face_1 = data[0].copy()
     plt.imshow(convert_to_img(face_1))
 
     a = fig.add_subplot(132)
     a.set_title("Single PC")
-    pc1_projection = np.matmul(results, pc1)
+    pc1_projection = np.matmul(data, pc1)
     obs_1 = pc1_projection[0].copy()
     pc1_reconstruction = np.matmul(obs_1, pc1.transpose())
     plt.imshow(convert_to_img(pc1_reconstruction))
 
     a = fig.add_subplot(133)
     a.set_title("k PC")
-    z = np.matmul(results, projection_matrix)
+    z = np.matmul(data, projection_matrix)
     obj1 = z[0].copy()
     reconstruction = np.matmul(obj1, projection_matrix.transpose())
     img = convert_to_img(reconstruction)
     plt.imshow(img)
     plt.savefig("reconstruction", bbox_inches='tight')
 
-results = np.array(read_files())
-results = standardize_data(results)
-cov = np.cov(results, rowvar=False)
+def main():
+    data = np.array(read_files())
+    data = standardize_data(data)
+    cov = np.cov(data, rowvar=False)
 
-display_pc1(results, cov)
-reconstruct_face(results, cov)
+    display_pc1(data, cov)
+    reconstruct_face(data, cov)
 
-plt.show()
+    plt.show()
+
+if __name__ == '__main__':
+    main()

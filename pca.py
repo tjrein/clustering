@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 
-def display_pca(results, cov):
+def display_pca(data, cov):
     projection_matrix = project(cov, 2)
-    z = np.matmul(results, projection_matrix)
+    z = np.matmul(data, projection_matrix)
     z = np.real(z)
     plt.scatter(z[:,0], z[:,1])
     plt.savefig("pca", bbox_inches="tight")
@@ -22,8 +22,12 @@ def project(cov, k):
 
     return np.array(projection_matrix).transpose()
 
-results = np.array(read_files())
-results = standardize_data(results)
-cov = np.cov(results, rowvar=False)
+def main():
+    data = np.array(read_files())
+    data = standardize_data(data)
+    cov = np.cov(data, rowvar=False)
 
-display_pca(results, cov)
+    display_pca(data, cov)
+
+if __name__ == '__main__':
+    main()
