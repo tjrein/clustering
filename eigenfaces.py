@@ -28,7 +28,6 @@ def get_k_eig(cov):
 
         k_sum += w[i]
         if (k_sum / eig_sum) > 0.95:
-            print("Number of Principal Components: " + str(len(projection_matrix)))
             break
 
     return np.array(projection_matrix).transpose()

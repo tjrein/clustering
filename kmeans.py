@@ -2,16 +2,21 @@ from PIL import Image
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import os
 import random
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 from read import read_files, standardize_data
 
+def perform_pca(data):
+    data = standardize_data(data)
+    cov = np.cov(data, rowvar=False)
+    projection_matrix = project(cov, 3)
+    z = np.real(np.matmul(data, projection_matrix))
+    return z
+
 def project(cov, k):
     w, v = LA.eig(cov)
-
     idx = np.argsort(w)[::-1][0:k]
 
     projection_matrix = []
@@ -56,19 +61,22 @@ def compute_clusters(data, reference_vectors, k):
 
     return clusters
 
-def plot_kmeans(clusters, reference_vectors):
+def plot_kmeans(clusters, reference_vectors, ax, d):
     for i, cluster in enumerate(clusters):
         color = get_color(i)
 
         for obs in cluster:
-            #plt.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10)
-            ax.scatter(obs[0], obs[1], obs[2], c=color, marker='x', linewidths=1, s=10)
+            if d < 3:
+                ax.scatter(obs[0], obs[1], c=color, marker='x', linewidths=1, s=10, alpha=0.5)
+            else:
+                ax.scatter(obs[0], obs[1], obs[2], c=color, marker='x', linewidths=1, s=10, alpha=0.5)
 
     for i, vec in enumerate(reference_vectors):
         color = get_color(i)
-        #plt.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k')
-        ax.scatter(vec[0], vec[1], vec[2], c=color, marker="o", s=100, edgecolors='k')
-
+        if d < 3:
+            ax.scatter(vec[0], vec[1], c=color, marker="o", s=80, edgecolors='k', alpha=1.0)
+        else:
+            ax.scatter(vec[0], vec[1], vec[2], c=color, marker="o", s=100, edgecolors='k', alpha=1.0)
     return
 
 def compute_reference_vectors(clusters):
@@ -80,46 +88,64 @@ def compute_reference_vectors(clusters):
 
     return reference_vectors
 
-z = None
-def init(*iteratoins):
-    ax.set_title("Initial Setup")
-    ax.scatter(z[:,0], z[:,1], z[:,2], marker='x', linewidths=1, s=10)
-    plt.savefig("kmeans_intial_setup", bbox_inches="tight")
-    return
+def animate(i, d, *iterations):
+    if d < 3:
+        ax = plt.subplot(111)
+    else:
+        ax = plt.subplot(111, projection='3d')
 
-def animate(i, *iterations):
     ax.clear()
     ax.set_title("Iteration " + str(i+1))
 
-    print("I", i)
-    print("len", len(iterations))
+    clusters = iterations[0][i]["clusters"]
+    reference_vectors = iterations[0][i]["reference_vectors"]
+
+    plot_kmeans(clusters, reference_vectors, ax, d)
 
     if i is 0:
         plt.savefig("kmeans_first_iteration", bbox_inches="tight")
-
-    if i is len(iterations) - 1:
+    if i is len(iterations[0]) - 1:
         plt.savefig("kmeans_last_iteration", bbox_inches="tight")
-
-    clusters = iterations[i]["clusters"]
-    reference_vectors = iterations[i]["reference_vectors"]
-
-    plot_kmeans(clusters, reference_vectors)
 
     return
 
+def init_closure(reference_vectors, data, d):
+    def init():
+        if d < 3:
+            ax = plt.subplot(111)
+            ax.scatter(data[:,0], data[:,1])
+        else:
+            ax = plt.subplot(111, projection='3d')
+            ax.scatter(data[:,0], data[:,1], data[:,2], marker='x', linewidths=1, s=10, alpha=0.5)
+
+        for i, vec in enumerate(reference_vectors):
+            c = get_color(i)
+            ax.scatter(vec[0], vec[1], vec[2], marker='o', s=100, c=c, edgecolors='k', alpha=1.0)
+
+        ax.set_title("Initial Setup")
+
+        plt.savefig("kmeans_initial_setup", bbox_inches="tight")
+
+    return init
+
 def myKMeans(data, k):
     iterations = []
+    reference_vectors = []
 
-    num_obs = data.shape[0]
+    if data.shape[1] > 3:
+        data = perform_pca(data)
+
+    fig = plt.figure()
+    num_obs, d = data.shape
     random.seed(0)
     rand_inds = random.sample(range(0, num_obs), k)
-
-    reference_vectors = []
 
     for i in rand_inds:
         reference_vectors.append(data[i])
 
     reference_vectors = np.array(reference_vectors)
+    init_test = init_closure(reference_vectors, data, d)
+
     clusters = np.array(compute_clusters(data, reference_vectors, k))
     iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
@@ -134,19 +160,10 @@ def myKMeans(data, k):
         reference_vectors = new_reference_vectors
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
-    ani = animation.FuncAnimation(fig, animate, init_func=init, interval=2000, frames=len(iterations), fargs=(iterations), blit=False, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, interval=2000, init_func=init_test, frames=len(iterations), fargs=(d, iterations), blit=False, repeat=False)
+
     plt.show()
+    #ani.save("test.mp4", writer="ffmpeg", fps=0.5)
 
-    #ani.save("test.avi", writer="ffmpeg", fps=0.5)
-    print("done")
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
 results = np.array(read_files())
-results = standardize_data(results)
-cov = np.cov(results, rowvar=False)
-projection_matrix = project(cov, 3)
-z = np.real(np.matmul(results, projection_matrix))
-
-myKMeans(z, 3)
+myKMeans(results, 5)
