@@ -2,9 +2,9 @@ import os
 from PIL import Image
 import numpy as np
 
-def read_files():
+def read_images(dir="./yalefaces"):
     results = []
-    for root, dirs, files in os.walk("./yalefaces/"):
+    for root, dirs, files in os.walk(dir):
         for name in files:
             if name == "Readme.txt":
                 continue

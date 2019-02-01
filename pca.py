@@ -1,5 +1,6 @@
-from read import read_files, standardize_data
+from read import read_images, standardize_data
 import numpy as np
+import sys
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
 
@@ -23,7 +24,7 @@ def project(cov, k):
     return np.array(projection_matrix).transpose()
 
 def main():
-    data = np.array(read_files())
+    data = np.array(read_images())
     data = standardize_data(data)
     cov = np.cov(data, rowvar=False)
 

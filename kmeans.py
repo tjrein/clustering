@@ -5,7 +5,7 @@ import random
 import sys
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
-from read import read_files, standardize_data
+from read import read_images, standardize_data
 
 def perform_pca(data):
     data = standardize_data(data)
@@ -102,8 +102,10 @@ def animate(i, d, *iterations):
     plot_kmeans(clusters, reference_vectors, ax, d)
 
     if i is 0:
+        #First iteration figure
         plt.savefig("kmeans_first_iteration", bbox_inches="tight")
     if i is len(iterations[0]) - 1:
+        #Last iteration figure
         plt.savefig("kmeans_last_iteration", bbox_inches="tight")
 
     return
@@ -122,6 +124,8 @@ def init_closure(reference_vectors, data, d):
             ax.scatter(vec[0], vec[1], vec[2], marker='o', s=100, c=c, edgecolors='k', alpha=1.0)
 
         ax.set_title("Initial Setup")
+
+        #Initial Setup Visualization Figure
         plt.savefig("kmeans_initial_setup", bbox_inches="tight")
 
     return init
@@ -159,9 +163,9 @@ def myKMeans(data, k):
 
     ani = animation.FuncAnimation(fig, animate, interval=2000, init_func=animate_init, frames=len(iterations), fargs=(d, iterations), blit=False, repeat=False)
 
-    #To save animation as video, comment out plt.show and uncomment ani.save
     plt.show()
-    #ani.save("test.mp4", writer="ffmpeg", fps=0.5)
+    #To save animation as video, comment out plt.show and uncomment the following lines
+    #ani.save(f"K_{k}.mp4", writer="ffmpeg", fps=0.5)
 
 def main():
     args = sys.argv
@@ -170,7 +174,7 @@ def main():
     if len(args) > 1 and args[1].isdigit():
         k = int(args[1])
 
-    data = np.array(read_files())
+    data = np.array(read_images())
     myKMeans(data, k)
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
-from read import read_files, standardize_data
+from read import read_images, standardize_data
 
 def project(cov, k):
     w, v = LA.eig(cov)
@@ -38,6 +38,8 @@ def display_pc1(data, cov):
     pc1 = projection_matrix[:,0].copy()
     img = convert_to_img(pc1)
     plt.imshow(img)
+
+    #PC1 figure
     plt.savefig("primary", bbox_inches='tight')
 
 def convert_to_img(vector):
@@ -72,10 +74,12 @@ def reconstruct_face(data, cov):
     reconstruction = np.matmul(obj1, projection_matrix.transpose())
     img = convert_to_img(reconstruction)
     plt.imshow(img)
+
+    #reconstruction figure
     plt.savefig("reconstruction", bbox_inches='tight')
 
 def main():
-    data = np.array(read_files())
+    data = np.array(read_images())
     data = standardize_data(data)
     cov = np.cov(data, rowvar=False)
 
