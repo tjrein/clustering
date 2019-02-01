@@ -1,9 +1,8 @@
-from PIL import Image
 import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
-import os
 import random
+import sys
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation as animation
 from read import read_files, standardize_data
@@ -123,7 +122,6 @@ def init_closure(reference_vectors, data, d):
             ax.scatter(vec[0], vec[1], vec[2], marker='o', s=100, c=c, edgecolors='k', alpha=1.0)
 
         ax.set_title("Initial Setup")
-
         plt.savefig("kmeans_initial_setup", bbox_inches="tight")
 
     return init
@@ -144,8 +142,7 @@ def myKMeans(data, k):
         reference_vectors.append(data[i])
 
     reference_vectors = np.array(reference_vectors)
-    init_test = init_closure(reference_vectors, data, d)
-
+    animate_init = init_closure(reference_vectors, data, d)
     clusters = np.array(compute_clusters(data, reference_vectors, k))
     iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
@@ -160,10 +157,21 @@ def myKMeans(data, k):
         reference_vectors = new_reference_vectors
         iterations.append({"clusters": clusters, "reference_vectors": reference_vectors})
 
-    ani = animation.FuncAnimation(fig, animate, interval=2000, init_func=init_test, frames=len(iterations), fargs=(d, iterations), blit=False, repeat=False)
+    ani = animation.FuncAnimation(fig, animate, interval=2000, init_func=animate_init, frames=len(iterations), fargs=(d, iterations), blit=False, repeat=False)
 
+    #To save animation as video, comment out plt.show and uncomment ani.save
     plt.show()
     #ani.save("test.mp4", writer="ffmpeg", fps=0.5)
 
-results = np.array(read_files())
-myKMeans(results, 5)
+def main():
+    args = sys.argv
+    k = 3
+
+    if len(args) > 1 and args[1].isdigit():
+        k = int(args[1])
+
+    data = np.array(read_files())
+    myKMeans(data, k)
+
+if __name__ == '__main__':
+    main()

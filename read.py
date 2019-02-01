@@ -4,7 +4,7 @@ import numpy as np
 
 def read_files():
     results = []
-    for root, dirs, files in os.walk("./yalefaces/yalefaces/"):
+    for root, dirs, files in os.walk("./yalefaces/"):
         for name in files:
             if name == "Readme.txt":
                 continue
