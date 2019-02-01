@@ -163,6 +163,7 @@ def myKMeans(data, k):
 
     ani = animation.FuncAnimation(fig, animate, interval=2000, init_func=animate_init, frames=len(iterations), fargs=(d, iterations), blit=False, repeat=False)
 
+    #SAVE TO VIDEO
     #To save animation as video, comment out plt.show and uncomment ani.save
     plt.show()
     #ani.save(f"K_{k}.mp4", writer="ffmpeg", fps=0.5)
