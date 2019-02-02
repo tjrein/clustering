@@ -12,15 +12,15 @@
   * matplotlib.pyplot
 
   In the event that dependencies are not installed, I have provided a "requirements.txt" file.
-  To install dependencies, use type "pip3 install -r requirements.txt"
+  To install dependencies, type "pip3 install -r requirements.txt"
 
 
 ==== Files Included ====
 
   *read.py
-  *yaleface.zip
+  *yalefaces.zip
   *pca.py
-  *eigenface.py
+  *eigenfaces.py
   *kmeans.py
 
 
@@ -33,7 +33,7 @@
     * standardize_data
 
     NOTE: read_images expects to read files out of the directory "./yalefaces". I have included the yalefaces dataset as a zip file.
-          Unzipping should allow this to work by default. If not, please ensure the yalefaces is in the same directory as read.py
+          Unzipping should allow this to work by default. If not, please ensure the yalefaces dataset is in the same directory as read.py
 
 
 ==== pca.py ====
@@ -100,7 +100,7 @@
   https://youtu.be/qG90K5fnh5o
 
   k_3.MP4:
-  https://youtu.be/1jZhzWNHPdc
-
+  https://youtu.be/Qe8MleZTGok
+  
   K_5.mp4
   https://youtu.be/1jZhzWNHPdc
